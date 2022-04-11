@@ -47,6 +47,9 @@ class CommandRunner
         Pattern rmdirPattern = Pattern.compile("rmdir ([\\.A-Za-z0-9\\/_]+)");
         Pattern rmPattern = Pattern.compile("rm ([\\.A-Za-z0-9\\/_]+)");
 
+        // TODO: modify to take in file names or something
+        Pattern cfeDiffPattern = Pattern.compile("cfeDiff ([\\.A-Za-z0-9\\/_]+) ([\\.A-Za-z0-9\\/_]+)");
+
         commandsCLI = new HashMap<Pattern, Method>();
         commandsCLI.put(cdPattern, CommandLineUtilities.class.getMethod("cd", String.class));
         commandsCLI.put(lsPattern, CommandLineUtilities.class.getMethod("ls", String.class));
@@ -55,6 +58,7 @@ class CommandRunner
         commandsCLI.put(mkdirPattern, CommandLineUtilities.class.getMethod("mkdir", String.class));
         commandsCLI.put(rmdirPattern, CommandLineUtilities.class.getMethod("rmdir", String.class));
         commandsCLI.put(rmPattern, CommandLineUtilities.class.getMethod("rm", String.class));
+        commandsCLI.put(cfeDiffPattern, RepositoryUtilities.class.getMethod("getFileDiff", String.class, String.class));
     }
 
     public Method getCLIMethod(String command) throws Exception
@@ -95,11 +99,21 @@ class CommandRunner
         {
             // System.out.println(method);
             String[] tempArgs = command.split(" ");
-            if (tempArgs.length > 1)
+            if (tempArgs.length == 2)
             {
                 String arg = tempArgs[1];
                 method.invoke(coffee.cmd, arg);
             }
+            // TODO: generalize for number of args
+            else if (tempArgs.length == 3) {
+                String arg1 = tempArgs[1];
+                String arg2 = tempArgs[2];
+                method.invoke(coffee.repo, arg1, arg2);
+            }
+            // else if (tempArgs.length >= 3) {
+            //     String[] args = Arrays.copyOfRange(tempArgs, 1, tempArgs.length);
+            //     method.invoke(coffee.cmd, args);
+            // }
             else
                 method.invoke(coffee.cmd);
             setRepositoryDetails(coffee);
