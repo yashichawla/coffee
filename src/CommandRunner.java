@@ -8,6 +8,7 @@ import java.lang.reflect.*;
 class CommandRunner
 {
     HashMap<Pattern, Method> commandsCLI;
+    HashMap<Pattern, Method> commandsRepo;
 
     public void initCommandMaps() throws Exception
     {
@@ -84,6 +85,43 @@ class CommandRunner
         else if (command.equals("cfe user login")) return DeveloperUtilities.class.getMethod("loginUser", Coffee.class);
         else if (command.equals("cfe user register")) return DeveloperUtilities.class.getMethod("registerUser", Coffee.class);
         else return null;
+    }
+
+    public void generateRepoCommandMap() throws Exception
+    {
+        Pattern createRepoPattern = Pattern.compile("cfe init ([A-Za-z0-9_]*)");
+        Pattern addFilesPattern = Pattern.compile("cfe add (( *[A-Za-z0-9._]*)*)");
+        Pattern commitFilesPattern = Pattern.compile("cfe commit ([A-Za-z0-9_]*)");
+        Pattern clonePattern = Pattern.compile("cfe clone ([A-Za-z0-9_]*/[A-Za-z0-9_]*)");
+        Pattern addCollabPattern = Pattern.compile("cfe repo add collab ([A-Za-z0-9_]*)");
+
+        commandsRepo = new HashMap<Pattern, Method>();
+    
+        // TODO: implement all
+        commandsRepo.put(createRepoPattern, RepositoryDatabaseUtilities.class.getMethod("createRepository", String.class));
+        // commandsRepo.put(addFilesPattern, RepositoryDatabaseUtilities.class.getMethod("add", String.class));
+        // commandsRepo.put(commitFilesPattern, RepositoryDatabaseUtilities.class.getMethod("commit", String.class));
+        // commandsRepo.put(clonePattern, RepositoryDatabaseUtilities.class.getMethod("clone", String.class));
+        // commandsRepo.put(addCollabPattern, RepositoryDatabaseUtilities.class.getMethod("addCollabprator", String.class));
+    }
+
+    public Method getRepositoryMethod(String command) throws Exception
+    {
+        // TODO: implement all
+        // if (command.equals("cfe push")) return RepositoryDatabaseUtilities.class.getMethod("push", String.class);
+        // else if (command.equals("cfe pull")) return RepositoryDatabaseUtilities.class.getMethod("pull", String.class);
+        // else if (command.equals("cfe status")) return RepositoryDatabaseUtilities.class.getMethod("status", String.class);
+        
+        for (Map.Entry<Pattern, Method> entry : commandsRepo.entrySet())
+        {
+            Matcher matcher = entry.getKey().matcher(command);
+            if (matcher.matches())
+            {
+                Method method = entry.getValue();
+                return method;
+            }
+        }
+        return null;
     }
 
     public void run(Coffee coffee, String command) throws Exception
