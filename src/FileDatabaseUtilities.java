@@ -5,12 +5,12 @@ import java.sql.*;
 public class FileDatabaseUtilities extends DatabaseUtilities {
     private String fileTableName = "file";
 
-    public void createFile(String userID, String path, String repositoryId, String status, LocalDateTime lastModified, LocalDateTime lastCommitted, LocalDateTime lastPushed) {
+    public void createFile(String fileID, String path, String repositoryId, String status, LocalDateTime lastModified, LocalDateTime lastCommitted, LocalDateTime lastPushed) {
         String query = "INSERT INTO " + fileTableName + " (_id, path, repository_id, status, last_modified, last_committed, last_pushed) VALUES (?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement pstmt;
         try {
             pstmt = conn.prepareStatement(query);
-            pstmt.setString(1, userID);
+            pstmt.setString(1, fileID);
             pstmt.setString(2, path);
             pstmt.setString(3, repositoryId);
             pstmt.setString(4, status);
@@ -60,7 +60,7 @@ public class FileDatabaseUtilities extends DatabaseUtilities {
     }
 
     public String getFileID(String repoID, String fileName) {
-        String query = "SELECT _id FROM " + fileTableName + "WHERE AND repository_id = ? AND path = ?";
+        String query = "SELECT _id FROM " + fileTableName + "WHERE repository_id = ? AND path = ?";
         PreparedStatement pstmt;
         try {
             pstmt = conn.prepareStatement(query);
@@ -75,7 +75,7 @@ public class FileDatabaseUtilities extends DatabaseUtilities {
     }
 
     public Boolean checkFileInDatabase(String repoID, String path) {
-        String query = "SELECT _id FROM " + fileTableName + "WHERE AND repository_id = ? AND path = ?";
+        String query = "SELECT _id FROM " + fileTableName + "WHERE repository_id = ? AND path = ?";
         PreparedStatement pstmt;
         try {
             pstmt = conn.prepareStatement(query);
@@ -94,7 +94,7 @@ public class FileDatabaseUtilities extends DatabaseUtilities {
     }
 
     public void updateFileModifiedTime(String repoID, String path, LocalDateTime lastModifiedTime) {
-        String query = "UPDATE " + fileTableName + " SET last_modified = ? WHERE AND repository_id = ? AND path = ?";
+        String query = "UPDATE " + fileTableName + " SET last_modified = ? WHERE repository_id = ? AND path = ?";
         PreparedStatement pstmt;
         try {
             pstmt = conn.prepareStatement(query);
@@ -109,7 +109,7 @@ public class FileDatabaseUtilities extends DatabaseUtilities {
     }
 
     public void updateFileCommitTime(String repoID, String path, LocalDateTime lastCommitTime) {
-        String query = "UPDATE " + fileTableName + " SET last_commited = ? WHERE AND repository_id = ? AND path = ?";
+        String query = "UPDATE " + fileTableName + " SET last_commited = ? WHERE repository_id = ? AND path = ?";
         PreparedStatement pstmt;
         try {
             pstmt = conn.prepareStatement(query);
@@ -124,7 +124,7 @@ public class FileDatabaseUtilities extends DatabaseUtilities {
     }
     
     public void updateFilePushTime(String repoID, String path, LocalDateTime lastPushTime) {
-        String query = "UPDATE " + fileTableName + " SET last_pushed = ? WHERE AND repository_id = ? AND path = ?";
+        String query = "UPDATE " + fileTableName + " SET last_pushed = ? WHERE repository_id = ? AND path = ?";
         PreparedStatement pstmt;
         try {
             pstmt = conn.prepareStatement(query);
@@ -136,7 +136,7 @@ public class FileDatabaseUtilities extends DatabaseUtilities {
             e.printStackTrace();
         }
 
-        String query2 = "UPDATE " + fileTableName + " SET status = \"unchanged\" WHERE AND repository_id = ? AND path = ?";
+        String query2 = "UPDATE " + fileTableName + " SET status = \"unchanged\" WHERE repository_id = ? AND path = ?";
         PreparedStatement pstmt2;
         try {
             pstmt2 = conn.prepareStatement(query2);
@@ -151,7 +151,7 @@ public class FileDatabaseUtilities extends DatabaseUtilities {
     }
 
     public Timestamp getLastModifiedTime(String repoID, String path) {
-        String query = "SELECT last_modified FROM " + fileTableName + "WHERE AND repository_id = ? AND path = ?";
+        String query = "SELECT last_modified FROM " + fileTableName + "WHERE repository_id = ? AND path = ?";
         PreparedStatement pstmt;
         try {
             pstmt = conn.prepareStatement(query);
