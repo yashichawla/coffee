@@ -41,4 +41,127 @@ public class FileDatabaseUtilities extends DatabaseUtilities {
             return null;
         }
     }
+
+    public ArrayList<String> getAllFileID() {
+        ArrayList<String> fileIDs = new ArrayList<String>();
+        String query = "SELECT _id FROM " + fileTableName;
+        PreparedStatement pstmt;
+        try {
+            pstmt = conn.prepareStatement(query);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                fileIDs.add(rs.getString("_id"));
+            }
+            return fileIDs;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public String getFileID(String repoID, String fileName) {
+        String query = "SELECT _id FROM " + fileTableName + "WHERE AND repository_id = ? AND path = ?";
+        PreparedStatement pstmt;
+        try {
+            pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, repoID);
+            pstmt.setString(2, fileName);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.getString("_id");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Boolean checkFileInDatabase(String repoID, String path) {
+        String query = "SELECT _id FROM " + fileTableName + "WHERE AND repository_id = ? AND path = ?";
+        PreparedStatement pstmt;
+        try {
+            pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, repoID);
+            pstmt.setString(2, path);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.next()) {
+                return true;
+            }
+            else return false;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }       
+    }
+
+    public void updateFileModifiedTime(String repoID, String path, LocalDateTime lastModifiedTime) {
+        String query = "UPDATE " + fileTableName + " SET last_modified = ? WHERE AND repository_id = ? AND path = ?";
+        PreparedStatement pstmt;
+        try {
+            pstmt = conn.prepareStatement(query);
+            pstmt.setObject(1, lastModifiedTime);
+            pstmt.setString(2, repoID);
+            pstmt.setString(3, path);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return;
+    }
+
+    public void updateFileCommitTime(String repoID, String path, LocalDateTime lastCommitTime) {
+        String query = "UPDATE " + fileTableName + " SET last_commited = ? WHERE AND repository_id = ? AND path = ?";
+        PreparedStatement pstmt;
+        try {
+            pstmt = conn.prepareStatement(query);
+            pstmt.setObject(1, lastCommitTime);
+            pstmt.setString(2, repoID);
+            pstmt.setString(3, path);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return;
+    }
+    
+    public void updateFilePushTime(String repoID, String path, LocalDateTime lastPushTime) {
+        String query = "UPDATE " + fileTableName + " SET last_pushed = ? WHERE AND repository_id = ? AND path = ?";
+        PreparedStatement pstmt;
+        try {
+            pstmt = conn.prepareStatement(query);
+            pstmt.setObject(1, lastPushTime);
+            pstmt.setString(2, repoID);
+            pstmt.setString(3, path);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String query2 = "UPDATE " + fileTableName + " SET status = \"unchanged\" WHERE AND repository_id = ? AND path = ?";
+        PreparedStatement pstmt2;
+        try {
+            pstmt2 = conn.prepareStatement(query2);
+            pstmt2.setString(1, repoID);
+            pstmt2.setString(1, path);
+            pstmt2.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return;
+    }
+
+    public Timestamp getLastModifiedTime(String repoID, String path) {
+        String query = "SELECT last_modified FROM " + fileTableName + "WHERE AND repository_id = ? AND path = ?";
+        PreparedStatement pstmt;
+        try {
+            pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, repoID);
+            pstmt.setString(2, path);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.getTimestamp("last_modified");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }   
 }
