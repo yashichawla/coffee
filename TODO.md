@@ -2,8 +2,8 @@
     - [ ] RepoUtils
 
 - [ ] DropBoxUtilities
-    - [ ] getLocalCommitTime
-    - [ ] getDropBoxCommitTime
+    - [ ] getLocalCommitTime - Yashi 
+    - [ ] getDropBoxCommitTime - Yashi
     
 - [ ] RepoUtils
     - [ ] getRepoOwner
