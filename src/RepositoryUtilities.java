@@ -428,7 +428,7 @@ class RepositoryUtilities
         if (!(relation.equals("owner") || relation.equals("collaborator")))
         {
             System.out.println("Error: You do not have push acccess to this repository.");
-            return;
+            return null;
         }
         
         String ownerId = coffee.relDB.getRepositoryOwnerFromRepositoryId(repositoryID);
