@@ -116,7 +116,7 @@ class DropBoxUtilities
                 uploadFile(file, fileName);
             }
 
-            if (!fileName.startsWith(".togepi"))
+            if (!fileName.startsWith(".coffee"))
             {
                 outputString.add(fileName);
             }
