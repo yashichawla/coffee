@@ -416,4 +416,40 @@ class RepositoryUtilities
             }
         }
     }
+
+    public ArrayList<String> push(Coffee coffee) throws SQLException, DbxException, ClassNotFoundException, IOException, InterruptedException
+    {
+        String repositoryID = coffee.repositoryID;
+        String repositoryName = coffee.repoDB.getRepositoryNameFromId(repositoryID);
+        String userID = coffee.userID;
+
+        // A user must be a collaborator to push
+        String relation = coffee.relDB.getUserRepositoryRelation(userID, repositoryID);
+        if (!(relation.equals("owner") || relation.equals("collaborator")))
+        {
+            System.out.println("Error: You do not have push acccess to this repository.");
+            return;
+        }
+        
+        String ownerId = coffee.relDB.getRepositoryOwnerFromRepositoryId(repositoryID);
+        String ownerName = coffee.devDB.getUsernameFromUserId(ownerId);
+
+        String dropBoxPath = "/" + ownerName + "/" + repositoryName;
+        LocalDateTime now = LocalDateTime.now(); 
+        LocalDateTime dropBoxCommitTime = coffee.dropBox.getLastDropBoxCommitTime(dropBoxPath);
+
+        ArrayList<String> trackedFiles = coffee.fileDB.getTrackedFiles(repositoryID);
+
+        for (String filePath : trackedFiles)
+        {
+            coffee.fileDB.updateFilePushTime(repositoryID, filePath, now);
+        }
+
+        ArrayList<String> outputString = coffee.dropBox.uploadFolder("../" + repositoryName, dropBoxPath);
+        
+
+        return outputString;
+
+    }
+
 }

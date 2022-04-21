@@ -26,7 +26,7 @@ public class FileDatabaseUtilities extends DatabaseUtilities {
 
     public ArrayList<String> getTrackedFiles(String repositoryId) {
         ArrayList<String> trackedFiles = new ArrayList<String>();
-        String query = "SELECT * FROM " + fileTableName + " WHERE repository_id = ?";
+        String query = "SELECT PATH FROM " + fileTableName + " WHERE repository_id = ?";
         PreparedStatement pstmt;
         try {
             pstmt = conn.prepareStatement(query);
