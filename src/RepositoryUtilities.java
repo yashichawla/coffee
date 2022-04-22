@@ -472,26 +472,31 @@ class RepositoryUtilities
 
         for (String filePath: trackedFiles)
         {
-            String cloudFilePath = "/" + ownerName + "/" + repositoryName + "/" + filePath.subSequence(2, filePath.length());
-            String cloudContent = coffee.dropBox.getFileContent(cloudFilePath);
+            try {
+                String cloudFilePath = "/" + ownerName + "/" + repositoryName + "/" + filePath.subSequence(2, filePath.length());
+                String cloudContent = coffee.dropBox.getFileContent(cloudFilePath);
 
-            // Find diff
-            String id = Generators.timeBasedGenerator().generate().toString();
-            String tempFileString = id+".txt";
-            BufferedWriter bw = new BufferedWriter(new FileWriter(tempFileString));
-            bw.write(cloudContent);
-            bw.close();
+                // Find diff
+                String id = Generators.timeBasedGenerator().generate().toString();
+                String tempFileString = id+".txt";
+                BufferedWriter bw = new BufferedWriter(new FileWriter(tempFileString));
+                bw.write(cloudContent);
+                bw.close();
 
-            String diff = getDiffBetweenFiles(tempFileString, filePath);
-            File tempFile = new File(tempFileString);
-            tempFile.delete();
-            
-            if (checkFileIsModified(diff).get("modified") == (Integer) 1) {
-                File file = new File(filePath);
-                long lastModified = file.lastModified();
-                LocalDateTime lastModifiedTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastModified), ZoneId.systemDefault());
-                coffee.fileDB.updateFileModifiedTime(repositoryID, filePath, lastModifiedTime);
-                System.out.println("modified: " + filePath);
+                String diff = getDiffBetweenFiles(tempFileString, filePath);
+                File tempFile = new File(tempFileString);
+                tempFile.delete();
+                
+                if (checkFileIsModified(diff).get("modified") == (Integer) 1) {
+                    File file = new File(filePath);
+                    long lastModified = file.lastModified();
+                    LocalDateTime lastModifiedTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastModified), ZoneId.systemDefault());
+                    coffee.fileDB.updateFileModifiedTime(repositoryID, filePath, lastModifiedTime);
+                    System.out.println("modified: " + filePath);
+                }
+            }
+            catch (Exception e) {
+                System.out.println(e);
             }
             
         }
