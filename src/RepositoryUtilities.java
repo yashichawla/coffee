@@ -406,18 +406,18 @@ class RepositoryUtilities
                 else
                 {
                     System.out.println("Pulling changes from repository...");
-                    coffee.dropBox.downloadFolder("./", dropBoxPath);
+                    coffee.dropBox.downloadFolder("/", dropBoxPath);
                 }
             }
             else
             {
                 System.out.println("Pulling changes from repository...");
-                coffee.dropBox.downloadFolder("./", dropBoxPath);
+                coffee.dropBox.downloadFolder("/", dropBoxPath);
             }
         }
     }
 
-    public ArrayList<String> push(Coffee coffee) throws SQLException, DbxException, ClassNotFoundException, IOException, InterruptedException
+    public void push(Coffee coffee) throws SQLException, DbxException, ClassNotFoundException, IOException, InterruptedException
     {
         String repositoryID = coffee.repositoryID;
         String repositoryName = coffee.repoDB.getRepositoryNameFromId(repositoryID);
@@ -428,7 +428,7 @@ class RepositoryUtilities
         if (!(relation.equals("owner") || relation.equals("collaborator")))
         {
             System.out.println("Error: You do not have push acccess to this repository.");
-            return null;
+            return;
         }
         
         String ownerId = coffee.relDB.getRepositoryOwnerFromRepositoryId(repositoryID);
@@ -445,10 +445,6 @@ class RepositoryUtilities
         }
 
         ArrayList<String> outputString = coffee.dropBox.uploadFolder("../" + repositoryName, dropBoxPath);
-        
-
-        return outputString;
-
     }
 
 
@@ -496,9 +492,71 @@ class RepositoryUtilities
                 }
             }
             catch (Exception e) {
-                System.out.println(e);
+                continue;
             }
             
         }
+    }
+
+    public void clone(Coffee coffee, String clonePath) throws SQLException, DbxException, ClassNotFoundException, IOException, InterruptedException
+    {
+        String[] clonePathComponents = clonePath.split("/");
+        String ownerName = clonePathComponents[0];
+        String repositoryName = clonePathComponents[1];
+        String visibility = coffee.repoDB.getRepositoryVisbilityFromUsernameRepositoryName(ownerName, repositoryName);
+
+        if(!(visibility.equals("public")))
+        {
+            String userID = coffee.userID;
+            String relation = coffee.relDB.getUserRepositoryRelation(userID, coffee.repositoryID);
+            if (!(relation.equals("owner") || relation.equals("collaborator")))
+            {
+                System.out.println("Error: You do not have acccess to this repository.");
+                return;
+            }
+            System.out.println("Cloning repository " + repositoryName + "...");
+            coffee.dropBox.downloadFolder("/", clonePath);
+        }
+        else
+        {
+            System.out.println("Cloning repository " + repositoryName + "...");
+            coffee.dropBox.downloadFolder("/", clonePath);
+        }
+    }
+
+    public void addCollaborator(Coffee coffee, String collaboratorName) throws SQLException
+    {
+        String userID = coffee.userID;
+        String repositoryID = coffee.repositoryID;
+        String collaboratorID = coffee.devDB.getUserIdFromUsername(collaboratorName);
+
+        String relation = coffee.relDB.getUserRepositoryRelation(userID, repositoryID);
+        if (!relation.equals("owner"))
+        {
+            System.out.println("Error: You need to be the owner of the repository to add collaborators.");
+            return;
+        }
+
+        if (collaboratorID == null)
+        {
+            System.out.println("Error: User " + collaboratorName + " does not exist.");
+            return;
+        }
+
+        relation = coffee.relDB.getUserRepositoryRelation(collaboratorID, repositoryID);
+        if (relation != null)
+        {
+            System.out.println("Error: User " + collaboratorName + " is already a collaborator.");
+            return;
+        }
+
+        if (userID.equals(collaboratorID))
+        {
+            System.out.println("Error: You cannot add yourself as a collaborator.");
+            return;
+        }
+
+        coffee.relDB.createUserRepositoryRelation(collaboratorID, repositoryID, "collaborator");
+        System.out.println("User " + collaboratorName + " added as a collaborator.");
     }
 }
