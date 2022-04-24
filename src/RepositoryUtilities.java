@@ -183,7 +183,7 @@ class RepositoryUtilities
     {
         try
         {
-            File file = new File(repoName + "/.coffee/.bean");
+            File file = new File(System.getProperty("user.dir") + "/" + repoName + "/.coffee/.bean");
             if (!file.exists()) file.createNewFile();
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
             bw.write("repositoryId," + repoId); bw.newLine();
@@ -220,7 +220,7 @@ class RepositoryUtilities
             return;
         }
 
-        coffee.cmd.mkdir(repoName);
+        coffee.cmd.mkdir(repoName); // add check if exists
         coffee.cmd.mkdir(repoName + "/.coffee");
         String repoId = generateRepositoryID();
         
@@ -504,12 +504,16 @@ class RepositoryUtilities
         String ownerName = clonePathComponents[0];
         String repositoryName = clonePathComponents[1];
         String visibility = coffee.repoDB.getRepositoryVisbilityFromUsernameRepositoryName(ownerName, repositoryName);
+        String ownerId = coffee.devDB.getUserIdFromUsername(ownerName);
+        String repositoryID = coffee.repoDB.getRepositoryIdFromUserIdRepositoryName(ownerId, repositoryName);
 
         if(!(visibility.equals("public")))
         {
             String userID = coffee.userID;
-            String relation = coffee.relDB.getUserRepositoryRelation(userID, coffee.repositoryID);
-            if (!(relation.equals("owner") || relation.equals("collaborator")))
+            System.out.println(userID + " " + repositoryID);
+            String relation = coffee.relDB.getUserRepositoryRelation(userID, repositoryID);
+            System.out.println(relation);
+            if (relation == null || !(relation.equals("owner") || !(relation.equals("collaborator"))))
             {
                 System.out.println("Error: You do not have acccess to this repository.");
                 return;
@@ -594,14 +598,14 @@ class RepositoryUtilities
         ArrayList<String> fileList = new ArrayList<String>();
         if(filePaths.equals("."))
         {
-            fileList = getAllFiles(new File("."));
+            fileList = getAllFiles(new File(System.getProperty("user.dir") + "/"));
         }
         else
         {
             String[] filePathsArray = filePaths.split(" ");
             for (String filePath: filePathsArray)
             {
-                fileList.addAll(getAllFiles(new File(filePath)));
+                fileList.addAll(getAllFiles(new File(System.getProperty("user.dir") + "/" + filePath)));
             }
         }
 
