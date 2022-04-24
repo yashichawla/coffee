@@ -19,7 +19,7 @@ class DropBoxUtilities
 
     public DropBoxUtilities()
     {
-        this.API_KEY = "sl.BGAYrlyRORI85q7qTdZ8Jy-0S3Zcb4plhIXhEbgYrF4Ph0ERyxOtCT2WTErVMz_Z1q4c8dvWMoR0CIjPe1Y00jcYOOcV5fr5I1B4A1DVyPMq1aZATHRN0hw1ReMmh9XXalYMPw4U8SGE";
+        this.API_KEY = "sl.BGNCAH9Y1hhVUYc-Sbhk8ie1NNR2H5cP7x2LMLikY2Ebp0LM6HebbH_uK_Ulc5LkBmSWJ56GhArTaZUUFqKXUCEiAHlZ6oa_eowpOYIPb_HPhfEunz2tsZdlVFXexoqIvGEB2zlCGMeH";
         this.config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
         this.client = new DbxClientV2(config, API_KEY);
     }
@@ -116,7 +116,7 @@ class DropBoxUtilities
                 uploadFile(file, fileName);
             }
 
-            if (!fileName.startsWith(".togepi"))
+            if (!fileName.startsWith(".coffee"))
             {
                 outputString.add(fileName);
             }
@@ -167,16 +167,32 @@ class DropBoxUtilities
         return commitTimes.get(commitTimes.size() - 1);
     }
 
-    public void downloadFolder(String localPath, String dropboxPath) throws DbxException, ClassNotFoundException, IOException, InterruptedException
+    
+    public void downloadFolder(String localPath, String dropboxPath, boolean pull) throws DbxException, ClassNotFoundException, IOException, InterruptedException
     {
-        // handle pull condition in calling function
+
+        String absolutePath = System.getProperty("user.dir") + localPath;
+        if (pull == true) 
+        {
+            // Change to the parent directory
+            absolutePath = absolutePath.substring(0, absolutePath.lastIndexOf("/"));
+        }
+
+        localPath = absolutePath + "CLONE.zip";
+        localPath = Paths.get(localPath).normalize().toString();
         if (dropboxPath.charAt(0) != '/') dropboxPath = "/" + dropboxPath;
         FileOutputStream downloadedFolder = new FileOutputStream(localPath);
         client.files().downloadZipBuilder(dropboxPath).start().download(downloadedFolder);
-        Process p = Runtime.getRuntime().exec("unzip -o " + localPath);
+        Process p = Runtime.getRuntime().exec("unzip -o " + localPath + " -d " + localPath.substring(0, localPath.length() - 9));
         p.waitFor();
         downloadedFolder.close();
         File f = new File(localPath);
         f.delete();
     }
+
+    public void downloadFolder(String localPath, String dropboxPath) throws DbxException, ClassNotFoundException, IOException, InterruptedException
+    {
+        downloadFolder(localPath, dropboxPath, false);
+    }
+
 }
