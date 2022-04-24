@@ -102,7 +102,7 @@ class CommandRunner
     
         // TODO: implement all
         commandsRepo.put(createRepoPattern, RepositoryUtilities.class.getMethod("init", Coffee.class, String.class));
-        // commandsRepo.put(addFilesPattern, RepositoryDatabaseUtilities.class.getMethod("add", String.class));
+        commandsRepo.put(addFilesPattern, RepositoryUtilities.class.getMethod("add", Coffee.class, ArrayList.class));
         commandsRepo.put(commitFilesPattern, RepositoryUtilities.class.getMethod("commit", Coffee.class));
         commandsRepo.put(pullFilesPattern, RepositoryUtilities.class.getMethod("pull", Coffee.class));
         commandsRepo.put(clonePattern, RepositoryUtilities.class.getMethod("clone", Coffee.class, String.class));

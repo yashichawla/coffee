@@ -560,7 +560,28 @@ class RepositoryUtilities
         System.out.println("User " + collaboratorName + " added as a collaborator.");
     }
 
-    public void add(Coffee coffee, ArrayList<String> filePaths)
+
+    private ArrayList<String> getAllFiles(File curDir) {
+        ArrayList<String> files = new ArrayList<String>();
+
+        // Get all working dir files and folders
+        File[] filesList = curDir.listFiles();
+
+        for(File f : filesList){
+
+            if (f.isDirectory()) {
+                ArrayList<String> subFiles = getAllFiles(f);
+                files.addAll(subFiles);
+            }
+
+            else if (f.isFile()){
+                files.add(f.getPath());
+            }
+        }
+        return files;
+    }
+
+    public void add(Coffee coffee, ArrayList<String> filePaths) throws IOException, SQLException
     {
         String userID = coffee.userID;
         String repositoryID = coffee.repositoryID;
@@ -576,7 +597,78 @@ class RepositoryUtilities
             return;
         }
         else if (filePaths.get(0).equals(".")) {
+            String current_dir = System.getProperty("user.dir");
+
+            filePaths = getAllFiles(new File(current_dir));
+
+            // Print out all files to be added
+            for (String filePath: filePaths) {
+                System.out.println(filePath);
+            }
+
+            // List of files in .cfeignore
+
+            String cfeignorePath = current_dir;
+            if (cfeignorePath.charAt(cfeignorePath.length()-1) != '/') {
+                cfeignorePath += "/";
+            }
+            cfeignorePath += ".cfeignore";
+
+            File cfeignoreFile = new File(cfeignorePath);
+            boolean coffeeExists = cfeignoreFile.exists();
             
+            if (coffeeExists) {
+                // Read .cfeignore file
+                BufferedReader br = new BufferedReader(new FileReader(cfeignorePath));
+                String line;
+                ArrayList<String> ignoredFiles = new ArrayList<String>();
+                while ((line = br.readLine()) != null) {
+                    ignoredFiles.add(line);
+                }
+                br.close();
+
+                // Remove ignored files from files to be added
+                for (String ignoredFile: ignoredFiles) {
+                    for (int i = 0; i < filePaths.size(); i++) {
+                        // Check if file exists
+                        // Read only the file name and not the path
+                        // TODO: This is a hack. Fix it.
+                        String fileName = filePaths.get(i).substring(filePaths.lastIndexOf("/"), filePaths.get(i).length());
+                        if (fileName.equals(ignoredFile)) {
+                            filePaths.remove(i);
+                        }
+                    }
+                }
+
+                // Check if files to be added exist
+                for (String filePath: filePaths) {
+                    if (!(new File(filePath).exists())) {
+                        filePaths.remove(filePath);
+                    }
+                }
+
+                // New files that aren't tracked
+                ArrayList<String> newTrackedFiles = new ArrayList<String>();
+                for (String filePath: filePaths) {
+                    
+                    if (!coffee.fileDB.checkFileInDatabase(repositoryID, filePath)) {
+                        newTrackedFiles.add(filePath);
+                    }
+                }
+
+                // Get current time
+                LocalDateTime now = LocalDateTime.now();
+
+                // Outputs
+                ArrayList<String> outputs = new ArrayList<String>();
+
+                for (String trackedFile: newTrackedFiles) {
+                    // Add file to database
+                    String fileID = generateFileID();
+                    coffee.fileDB.createFile(fileID, trackedFile, repositoryID, "unchanged", now, null, null);
+                    outputs.add("Added " + trackedFile + " to the repository.");
+                }
+            }
         }
     }
 }
