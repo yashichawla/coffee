@@ -2,6 +2,7 @@ import os
 import dotenv
 from flask import Flask, redirect
 from flask_sqlalchemy import SQLAlchemy
+from eralchemy import render_er
 
 dotenv.load_dotenv()
 
@@ -111,4 +112,6 @@ def home():
 
 
 if __name__ == "__main__":
+    render_er(db.Model, 'model_erd.png')
+
     app.run()
