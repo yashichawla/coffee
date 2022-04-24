@@ -416,4 +416,26 @@ class RepositoryUtilities
             }
         }
     }
+
+    public void add(Coffee coffee, ArrayList<String> filePaths)
+    {
+        String userID = coffee.userID;
+        String repositoryID = coffee.repositoryID;
+        // String username = coffee.devDB.getUsernameFromUserId(userID);
+        String relation = coffee.relDB.getUserRepositoryRelation(userID, repositoryID);
+        if (!(relation.equals("owner") || relation.equals("collaborator")))
+        {
+            System.out.println("Error: You do not have acccess to this repository.");
+            return;
+        }
+
+        if(filePaths.get(0).equals("")) {
+            System.out.println("Error: No files specified.");
+            return;
+        }
+        else if (filePaths.get(0).equals(".")) {
+            
+        }
+
+    }
 }
