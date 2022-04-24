@@ -3,7 +3,11 @@ import java.util.*;
 import java.sql.*;
 
 public class FileDatabaseUtilities extends DatabaseUtilities {
-    private String fileTableName = "file";
+
+    FileDatabaseUtilities() {
+        super();
+        tableName = "file";
+    }
 
     public void createFile(String fileID, String path, String repositoryId, String status, LocalDateTime lastModified, LocalDateTime lastCommitted, LocalDateTime lastPushed) {
         String query = "INSERT INTO " + fileTableName + " (_id, path, repository_id, status, last_modified, last_committed, last_pushed) VALUES (?, ?, ?, ?, ?, ?, ?)";

@@ -8,7 +8,11 @@ import java.util.regex.*;
 
 class RepositoryDatabaseUtilities extends DatabaseUtilities
 {
-    private static String tableName = "repository";
+
+    RepositoryDatabaseUtilities() {
+        super();
+        tableName = "repository";
+    }
 
     public void createRepository(String repositoryId, String repositoryName, String description, String url, LocalDateTime createTime, String visibility, String userId)
     {
