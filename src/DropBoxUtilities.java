@@ -19,7 +19,7 @@ class DropBoxUtilities
 
     public DropBoxUtilities()
     {
-        this.API_KEY = "sl.BGWJpYT3pE1K9ZlWDOW9BcK6dUd6QC_YnTa46vNeTRriPg_xmxhUEOmCM6WSWDn3otWw7QFRXxClPNxixeGftMh4DvwXS_MvqsxcZNMiAIWoHJwfEEArByzDJ7ddxf3L-SJq__3pDYeJ";
+        this.API_KEY = "sl.BGWOLVFWNzgwTJU71HWkvE-4TscYtupG0rJX1TSI7A8_RcuLCXWfZTcqbt10_KLwWZ6IXYFDJ3YITO-_XaSlhBSoAr8Z_T3MJ9daF_hlceB2GfjN7Z1B7f-QOgcSlYZpHQiW6SKyjncn";
         this.config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
         this.client = new DbxClientV2(config, API_KEY);
     }
@@ -40,6 +40,7 @@ class DropBoxUtilities
 
     public String getFileContent(String dropboxPath) throws DbxException, ClassNotFoundException, IOException
     {
+        System.out.println("DropBox path " + dropboxPath);
         if (dropboxPath.charAt(0) != '/') dropboxPath = "/" + dropboxPath;
         StringBuilder sb = new StringBuilder();
         try (InputStream in = client.files().download(dropboxPath).getInputStream()) 
@@ -51,6 +52,10 @@ class DropBoxUtilities
                 sb.append(line);
                 sb.append("\n");
             }
+        }
+        catch (Exception e)
+        {
+            return "";
         }
         return sb.toString();
     }
@@ -98,6 +103,7 @@ class DropBoxUtilities
             String fileName = "/" + file;
             fileName = Paths.get(fileName).normalize().toString();
             int absPathLength = (System.getProperty("user.dir") + "/").length();
+            // System.out.println(fileName);
             fileName = dropboxPath + "/" + fileName.substring(absPathLength);
             System.out.println("Uploading " + fileName);
             if (Files.isDirectory(Paths.get(file)))
@@ -135,11 +141,13 @@ class DropBoxUtilities
         ArrayList<LocalDateTime> commitTimes = new ArrayList<LocalDateTime>();
         for (String file : fileList)
         {
+            System.out.println(file);
             fileName = file.substring(dropboxPath.length() + 1);
             if (fileName.equals(".bean")) continue;
-            String[] fileNameSplit = fileName.split("$");
+            String[] fileNameSplit = fileName.split("--");
             timestamp = fileNameSplit[fileNameSplit.length - 1];
-            LocalDateTime localDateTime = LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern("%Y-%m-%d---%H:%M:%S"));
+            System.out.println(timestamp);
+            LocalDateTime localDateTime = LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern("yyyy-MM-dd't'HH:mm:ss"));
             commitTimes.add(localDateTime);
         }
         commitTimes.sort(Comparator.naturalOrder());
@@ -151,15 +159,16 @@ class DropBoxUtilities
     public LocalDateTime getLastLocalCommitTime() throws DbxException, ClassNotFoundException, IOException
     {
         ArrayList<LocalDateTime> commitTimes = new ArrayList<LocalDateTime>();
-        File commitDirectory = new File(".coffee");
+        File commitDirectory = new File(System.getProperty("user.dir") + "/.coffee");
         String fileName, timestamp;
         for (File file : commitDirectory.listFiles())
         {
             fileName = file.getName();
+            System.out.println(fileName);
             if (fileName.equals(".bean")) continue;
-            String[] fileNameSplit = fileName.split("$");
+            String[] fileNameSplit = fileName.split("--");
             timestamp = fileNameSplit[fileNameSplit.length - 1];
-            LocalDateTime localDateTime = LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern("%Y-%m-%d---%H:%M:%S"));
+            LocalDateTime localDateTime = LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
             commitTimes.add(localDateTime);
         }
         commitTimes.sort(Comparator.naturalOrder());
@@ -178,6 +187,7 @@ class DropBoxUtilities
             // Change to the parent directory
             absolutePath = absolutePath.substring(0, absolutePath.lastIndexOf("/"));
         }
+        System.out.println(absolutePath);
 
         localPath = absolutePath + "CLONE.zip";
         localPath = Paths.get(localPath).normalize().toString();
