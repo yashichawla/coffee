@@ -183,7 +183,7 @@ class RepositoryUtilities
     {
         try
         {
-            File file = new File(repoName + "/.coffee/.bean");
+            File file = new File(System.getProperty("user.dir") + "/" + repoName + "/.coffee/.bean");
             if (!file.exists()) file.createNewFile();
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
             bw.write("repositoryId," + repoId); bw.newLine();
@@ -220,7 +220,7 @@ class RepositoryUtilities
             return;
         }
 
-        coffee.cmd.mkdir(repoName);
+        coffee.cmd.mkdir(repoName); // add check if exists
         coffee.cmd.mkdir(repoName + "/.coffee");
         String repoId = generateRepositoryID();
         
@@ -406,13 +406,13 @@ class RepositoryUtilities
                 else
                 {
                     System.out.println("Pulling changes from repository...");
-                    coffee.dropBox.downloadFolder("/", dropBoxPath);
+                    coffee.dropBox.downloadFolder("/", dropBoxPath, true);
                 }
             }
             else
             {
                 System.out.println("Pulling changes from repository...");
-                coffee.dropBox.downloadFolder("/", dropBoxPath);
+                coffee.dropBox.downloadFolder("/", dropBoxPath, true);
             }
         }
     }
@@ -504,12 +504,16 @@ class RepositoryUtilities
         String ownerName = clonePathComponents[0];
         String repositoryName = clonePathComponents[1];
         String visibility = coffee.repoDB.getRepositoryVisbilityFromUsernameRepositoryName(ownerName, repositoryName);
+        String ownerId = coffee.devDB.getUserIdFromUsername(ownerName);
+        String repositoryID = coffee.repoDB.getRepositoryIdFromUserIdRepositoryName(ownerId, repositoryName);
 
         if(!(visibility.equals("public")))
         {
             String userID = coffee.userID;
-            String relation = coffee.relDB.getUserRepositoryRelation(userID, coffee.repositoryID);
-            if (!(relation.equals("owner") || relation.equals("collaborator")))
+            System.out.println(userID + " " + repositoryID);
+            String relation = coffee.relDB.getUserRepositoryRelation(userID, repositoryID);
+            System.out.println(relation);
+            if (relation == null || !(relation.equals("owner") || !(relation.equals("collaborator"))))
             {
                 System.out.println("Error: You do not have acccess to this repository.");
                 return;
@@ -560,7 +564,6 @@ class RepositoryUtilities
         System.out.println("User " + collaboratorName + " added as a collaborator.");
     }
 
-
     private ArrayList<String> getAllFiles(File curDir) {
         ArrayList<String> files = new ArrayList<String>();
 
@@ -581,94 +584,85 @@ class RepositoryUtilities
         return files;
     }
 
-    public void add(Coffee coffee, ArrayList<String> filePaths) throws IOException, SQLException
+    public void add(Coffee coffee, String filePaths) throws IOException, SQLException
     {
         String userID = coffee.userID;
         String repositoryID = coffee.repositoryID;
-        // String username = coffee.devDB.getUsernameFromUserId(userID);
         String relation = coffee.relDB.getUserRepositoryRelation(userID, repositoryID);
         if (!(relation.equals("owner") || relation.equals("collaborator")))
         {
             System.out.println("Error: You do not have acccess to this repository.");
             return;
         }
-        if(filePaths.get(0).equals("")) {
+
+        ArrayList<String> fileList = new ArrayList<String>();
+        if(filePaths.equals("."))
+        {
+            fileList = getAllFiles(new File(System.getProperty("user.dir") + "/"));
+        }
+        else
+        {
+            String[] filePathsArray = filePaths.split(" ");
+            for (String filePath: filePathsArray)
+            {
+                fileList.addAll(getAllFiles(new File(System.getProperty("user.dir") + "/" + filePath)));
+            }
+        }
+
+        System.out.println(fileList);
+        if (fileList.size() == 0)
+        {
             System.out.println("Error: No files specified.");
             return;
         }
-        else if (filePaths.get(0).equals(".")) {
-            String current_dir = System.getProperty("user.dir");
 
-            filePaths = getAllFiles(new File(current_dir));
-
-            // Print out all files to be added
-            for (String filePath: filePaths) {
-                System.out.println(filePath);
+        ArrayList<String> ignoredFiles = new ArrayList<String>();
+        File ignoreFile = new File(".cfeignore");
+        if (ignoreFile.exists())
+        {
+            BufferedReader br = new BufferedReader(new FileReader(ignoreFile));
+            String line;
+            while ((line = br.readLine()) != null)
+            {
+                line = line.trim();
+                if (!line.equals(""))
+                {
+                    ignoredFiles.addAll(getAllFiles(new File(line)));
+                }
             }
+            br.close();
+        }
 
-            // List of files in .cfeignore
-
-            String cfeignorePath = current_dir;
-            if (cfeignorePath.charAt(cfeignorePath.length()-1) != '/') {
-                cfeignorePath += "/";
+        for (String ignoredFile: ignoredFiles)
+        {
+            for (int i = 0; i < fileList.size(); i++)
+            {
+                if ((fileList.get(i).contains(ignoredFile)) || (fileList.get(i).startsWith("./.coffee/COMMIT")))
+                {
+                    File file = new File(fileList.get(i));
+                    if (file.exists())
+                    {
+                        fileList.remove(i);
+                    }
+                }
             }
-            cfeignorePath += ".cfeignore";
+        }
 
-            File cfeignoreFile = new File(cfeignorePath);
-            boolean coffeeExists = cfeignoreFile.exists();
+        ArrayList<String> newTrackedFiles = new ArrayList<String>();
+        for (String filePath: fileList) {
             
-            if (coffeeExists) {
-                // Read .cfeignore file
-                BufferedReader br = new BufferedReader(new FileReader(cfeignorePath));
-                String line;
-                ArrayList<String> ignoredFiles = new ArrayList<String>();
-                while ((line = br.readLine()) != null) {
-                    ignoredFiles.add(line);
-                }
-                br.close();
-
-                // Remove ignored files from files to be added
-                for (String ignoredFile: ignoredFiles) {
-                    for (int i = 0; i < filePaths.size(); i++) {
-                        // Check if file exists
-                        // Read only the file name and not the path
-                        // TODO: This is a hack. Fix it.
-                        String fileName = filePaths.get(i).substring(filePaths.lastIndexOf("/"), filePaths.get(i).length());
-                        if (fileName.equals(ignoredFile)) {
-                            filePaths.remove(i);
-                        }
-                    }
-                }
-
-                // Check if files to be added exist
-                for (String filePath: filePaths) {
-                    if (!(new File(filePath).exists())) {
-                        filePaths.remove(filePath);
-                    }
-                }
-
-                // New files that aren't tracked
-                ArrayList<String> newTrackedFiles = new ArrayList<String>();
-                for (String filePath: filePaths) {
-                    
-                    if (!coffee.fileDB.checkFileInDatabase(repositoryID, filePath)) {
-                        newTrackedFiles.add(filePath);
-                    }
-                }
-
-                // Get current time
-                LocalDateTime now = LocalDateTime.now();
-
-                // Outputs
-                ArrayList<String> outputs = new ArrayList<String>();
-
-                for (String trackedFile: newTrackedFiles) {
-                    // Add file to database
-                    String fileID = generateFileID();
-                    coffee.fileDB.createFile(fileID, trackedFile, repositoryID, "unchanged", now, null, null);
-                    outputs.add("Added " + trackedFile + " to the repository.");
-                }
+            if (!coffee.fileDB.checkFileInDatabase(repositoryID, filePath)) {
+                newTrackedFiles.add(filePath);
             }
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        ArrayList<String> outputs = new ArrayList<String>();
+        for (String trackedFile: newTrackedFiles)
+        {
+            String fileID = generateFileID();
+            coffee.fileDB.createFile(fileID, trackedFile, repositoryID, "unchanged", now, null, null);
+            System.out.println("Added " + trackedFile + " to the repository.");
         }
     }
 }

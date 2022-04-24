@@ -64,7 +64,7 @@ public class FileDatabaseUtilities extends DatabaseUtilities {
     }
 
     public String getFileID(String repoID, String fileName) {
-        String query = "SELECT _id FROM " + fileTableName + "WHERE repository_id = ? AND path = ?";
+        String query = "SELECT _id FROM " + fileTableName + " WHERE repository_id = ? AND path = ?";
         PreparedStatement pstmt;
         try {
             pstmt = conn.prepareStatement(query);
@@ -79,7 +79,7 @@ public class FileDatabaseUtilities extends DatabaseUtilities {
     }
 
     public Boolean checkFileInDatabase(String repoID, String path) {
-        String query = "SELECT _id FROM " + fileTableName + "WHERE repository_id = ? AND path = ?";
+        String query = "SELECT _id FROM " + fileTableName + " WHERE repository_id = ? AND path = ?";
         PreparedStatement pstmt;
         try {
             pstmt = conn.prepareStatement(query);
@@ -155,7 +155,7 @@ public class FileDatabaseUtilities extends DatabaseUtilities {
     }
 
     public Timestamp getLastModifiedTime(String repoID, String path) {
-        String query = "SELECT last_modified FROM " + fileTableName + "WHERE repository_id = ? AND path = ?";
+        String query = "SELECT last_modified FROM " + fileTableName + " WHERE repository_id = ? AND path = ?";
         PreparedStatement pstmt;
         try {
             pstmt = conn.prepareStatement(query);
