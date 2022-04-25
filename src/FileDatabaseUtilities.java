@@ -5,8 +5,7 @@ import java.sql.*;
 public class FileDatabaseUtilities extends DatabaseUtilities {
 
     FileDatabaseUtilities() {
-        super();
-        tableName = "file";
+        super("file");
     }
 
     public void createFile(String fileID, String path, String repositoryId, String status, LocalDateTime lastModified, LocalDateTime lastCommitted, LocalDateTime lastPushed) {

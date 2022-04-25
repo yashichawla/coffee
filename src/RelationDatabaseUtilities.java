@@ -9,8 +9,7 @@ class RelationDatabaseUtilities extends DatabaseUtilities
 {
 
     RelationDatabaseUtilities() {
-        super();
-        tableName = "repositoryuserelation";
+        super("repositoryuserelation");
     }
 
     public void createUserRepositoryRelation(String userID, String repositoryID, String relation) throws SQLException

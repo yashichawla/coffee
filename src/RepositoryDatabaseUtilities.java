@@ -10,8 +10,7 @@ class RepositoryDatabaseUtilities extends DatabaseUtilities
 {
 
     RepositoryDatabaseUtilities() {
-        super();
-        tableName = "repository";
+        super("repository");
     }
 
     public void createRepository(String repositoryId, String repositoryName, String description, String url, LocalDateTime createTime, String visibility, String userId)

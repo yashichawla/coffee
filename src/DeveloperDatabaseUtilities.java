@@ -10,8 +10,7 @@ class DeveloperDatabaseUtilities extends DatabaseUtilities
 
     DeveloperDatabaseUtilities()
     {
-        super();
-        tableName = "developer";
+        super("developer");
     }
 
     public ArrayList<String> getAllUsernames() throws SQLException
