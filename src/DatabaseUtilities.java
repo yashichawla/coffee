@@ -10,7 +10,7 @@ abstract class DatabaseUtilities
     private static String user;
     private final String password;
 
-    private String tableName;
+    protected String tableName;
 
     Connection conn;
     DatabaseUtilities(String tableName)
