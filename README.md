@@ -2,7 +2,7 @@
 
 A version control system built using Java and DropBox API.
 
-Coffee supports most major version control features such as `add`, `commit`, `pull`, `push`, `status`, `clone` to name a few. The CLI also features prominent CLI utility tools to help out such as `clear`, `cd`, `mkdir`, `rmdir`, `nano`, `ls` and `cat`.
+Coffee supports most major version control features such as `add`, `commit`, `pull`, `push`, `status`, `clone` to name a few. The CLI also features prominent CLI utility tools to help out such as `clear`, `cd`, `mkdir`, `rmdir`,`ls` and `cat`.
 
 # How to use Coffee
 
